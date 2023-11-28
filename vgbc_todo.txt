@@ -1,0 +1,10 @@
+Minimum:
+- fix up barrier from peter
+- update vote table when suggestion toggled
+- add suggestion backend
+- implement voting alg to display results
+- can't interact until user chosen
+
+Extras:
+- add category toggling for suggestion chart
+- add search for suggestion chart

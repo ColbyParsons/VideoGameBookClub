@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Just+Another+Hand" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="utf-8" />
+    <title>Video Game Book Club</title>
+<style>
+
+/* global styles */
+body {
+    font-family: 'Just Another Hand', Helvetica;
+    font-weight: 400;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    background-image: url(white-texture.jpg);
+}
+
+/* navBar styles */
+#navBar {
+    display: flex;
+    position: fixed;
+    justify-content: space-between;
+    margin: 0;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    z-index: 2;
+    background-color: black;
+}
+#pageTitle{
+    display: inline-block;
+    font-family: 'Just Another Hand', Helvetica;
+    font-weight: 400;
+    font-size: 28px;
+    color: #fbf7f5;
+    padding: 12px 30px;
+    margin: 0;
+}
+#navList {
+    list-style-type: none;
+    margin: 0;
+    padding: 0px 30px;
+}
+#navList li {
+    display: inline-block;
+    padding: 12px 10px;
+    margin: 0;
+    color: #fbf7f5;
+    cursor: pointer;
+}
+
+/* user select styles */
+#userSelectArea {
+    margin-top: 45px;
+    width: min(100%, 900px);
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+    user-select: none;
+}
+#userSelectArea div {
+    display: flex;
+    cursor: pointer;
+    margin: 30px;
+    flex-direction: column;
+    align-items: center;
+
+    background:transparent;
+    padding:0.5rem 0.5rem;
+    border-top-left-radius: 255px 15px;
+    border-top-right-radius: 15px 225px;
+    border-bottom-right-radius: 225px 15px;
+    border-bottom-left-radius:15px 255px;
+    border:solid 2px #41403E;
+    /* box-shadow: -25px 25px 34px -26px hsla(0,0%,0%,.2); */
+    box-shadow: -5px 5px 3px 3px hsla(0,0%,0%,.3);
+
+    transition: box-shadow 0.1s ease-in-out;
+    background-color: #fbf7f5;
+    
+    &:hover{
+        box-shadow: -2px 2px 1px 1px hsla(0,0%,0%,.3);
+    }
+}
+.avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+
+    /* workaround for object-fit: cover causing bad downscaling interpolation */
+    overflow-clip-margin: unset;
+}
+.avatarWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 110px;
+    height: 110px;
+    border-top-left-radius: 53% 50%;
+    border-top-right-radius: 50% 54%;
+    border-bottom-right-radius: 52% 50%;
+    border-bottom-left-radius: 50% 51%;
+    border:solid 2px #41403E;
+}
+#userSelectArea p {
+    margin: 10px 0px;
+}
+
+/* vote/suggest styles */
+#voteArea, #suggestArea {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+#voteArea h3 {
+    align-self: flex-start;
+    margin-left: 5%;
+    margin-bottom: 0;
+}
+.tableHeader h3 {
+    margin: 0;
+}
+.tableHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 90%;
+    margin-top: 1em;
+}
+.gameTable {
+    margin: 5px;
+    padding: 5px;
+    border:solid 3px #41403E;
+    border-collapse: collapse; 
+    width: 90%;
+}
+.gameTableHead th {
+    padding: 5px 5px;
+    text-align: left;
+    border:solid 3px #41403E;
+    background-color: #fbf7f5;
+}
+.voteItem {
+    cursor: grab;
+}
+.gameTableItem {
+    border:solid 3px #41403E;
+    vertical-align: center;
+}
+.gameTableItem td {
+    /* text-align: center; */
+    background-color: #fbf7f5;
+    padding: 5px 5px 5px 5px;
+}
+.gameTableItem td span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.tablePaginator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
+.tablePaginator div {
+    padding: 0px 10px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+}
+.iconHolder {
+    text-align: center;
+}
+.draggedRow {
+    cursor: grabbing;
+}
+.hideElem {
+    display: none;
+}
+.draggedRowDiv {
+    position: absolute;
+    z-index: 10;
+    cursor: grabbing;
+    border:solid 3px #41403E;
+}
+.is-dragging td {
+    background-color: lightgrey;
+}
+.addIcon {
+    cursor: pointer;
+}
+.fa-arrows-up-down, .fa-arrow-up-long, .fa-arrow-down-long {
+    font-size: 24px;
+    margin-left: auto;
+}
+.tableSort {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+</style>
+</head>
+<body>
+    <div id="navBar">
+        <h1 id="pageTitle">
+            Video Game Book Club
+        </h1>
+        <ul id="navList">
+            <li>Login</li>
+            <li>Vote</li>
+            <li>Suggest</li>
+        </ul>
+    </div>
+    <div id="userSelectArea">
+        <!-- Content generated from user array -->
+    </div>
+    <div id="voteArea">
+        <h3>
+            Your Vote:
+        </h3>
+        <table id="votePicker" class="gameTable">
+            <thead class="gameTableHead">
+                <th>Title</th>
+                <th>Developer</th>
+                <th>Publisher</th>
+                <th>Release Date</th>
+                <th>Rating /5</th>
+                <th></th>
+            </thead>
+            <tbody>
+                <tr class="voteItem gameTableItem">
+                    <td>Game 1</td>
+                    <td>Bethesda Studio</td>
+                    <td>Bethesda</td>
+                    <td>October 2016</td>
+                    <td>4.5</td>
+                    <td class="iconHolder">
+                        <span>
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </span>
+                    </td>
+                </tr>
+                <tr class="voteItem gameTableItem">
+                    <td>Game 2</td>
+                    <td>Bethesda Studio</td>
+                    <td>Bethesda</td>
+                    <td>October 2016</td>
+                    <td>4.5</td>
+                    <td class="iconHolder">
+                        <span>
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </span>
+                    </td>
+                </tr>
+                <tr class="voteItem gameTableItem">
+                    <td>Game 3</td>
+                    <td>Bethesda Studio</td>
+                    <td>Bethesda</td>
+                    <td>October 2016</td>
+                    <td>4.5</td>
+                    <td class="iconHolder">
+                        <span>
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h3>
+            Standings:
+        </h3>
+        <table class="gameTable">
+            <thead class="gameTableHead">
+                <th>Title</th>
+                <th>Developer</th>
+                <th>Publisher</th>
+                <th>Release Date</th>
+                <th>Rating /5</th>
+            </thead>
+            <tbody>
+                <tr class="gameTableItem">
+                    <td>Game 1</td>
+                    <td>Bethesda Studio</td>
+                    <td>Bethesda</td>
+                    <td>October 2016</td>
+                    <td>4.5</td>
+                </tr>
+                <tr class="gameTableItem">
+                    <td>Game 2</td>
+                    <td>Bethesda Studio</td>
+                    <td>Bethesda</td>
+                    <td>October 2016</td>
+                    <td>4.5</td>
+                </tr>
+                <tr class="gameTableItem">
+                    <td>Game 3</td>
+                    <td>Bethesda Studio</td>
+                    <td>Bethesda</td>
+                    <td>October 2016</td>
+                    <td>4.5</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="suggestArea">
+        <div class="tableHeader">
+            <h3>
+                Suggest A Game:
+            </h3>
+            <div class="tablePaginator">
+                <div id="suggestPrev">< Prev</div>
+                <div id="suggestNext">Next ></div>
+            </div>
+        </div>
+        <table id="gamePicker" class="gameTable">
+            <thead class="gameTableHead">
+                <th>
+                    <div class="tableSort">
+                        <div>Title</div>
+                        <span><i class="fa-solid fa-arrow-down-long"></i></span>
+                    </div>
+                </th>
+                <th>
+                    <div class="tableSort">
+                        <div>Category</div>
+                        <span><i class="fa-solid fa-arrows-up-down"></i></span>
+                    </div>
+                    
+                    <!-- <span><i class="fa-solid fa-arrow-up-long"></i></span> -->
+                </th>
+                <th>
+                    <div class="tableSort">
+                        <div>Release</div>
+                        <span><i class="fa-solid fa-arrows-up-down"></i></span>
+                    </div>
+                </th>
+                <th>
+                    <div class="tableSort">
+                        <div>Ratings</div>
+                        <span><i class="fa-solid fa-arrows-up-down"></i></span>
+                    </div>
+                </th>
+                <th>
+                    <div class="tableSort">
+                        <div>Rating /5</div>
+                        <span><i class="fa-solid fa-arrows-up-down"></i></span>
+                    </div>
+                </th>
+                <th></th>
+            </thead>
+            <tbody>
+                <!-- Content generated from game data -->
+            </tbody>
+        </table>
+    </div>
+</body>
+
+<script>
+    // dom references
+    const userArea = document.getElementById('userSelectArea');
+    const voteArea = document.getElementById('voteArea');
+    const voteTable = document.getElementById('votePicker');
+    const voteTbody = voteTable.querySelector('tbody');
+    const pageBody = document.querySelector('body');
+    const suggestTbody = document.getElementById('suggestArea').querySelector('tbody');
+    var suggestIcons;
+
+    var currUser = null;
+
+    // data per user.
+    // User maps to location in array
+    // Stores name of each user
+    // Stores votes in ordered array of game ids
+    // Stores selected user icon
+    // Stores suggested games per user
+    // Is populated from server via call and is updated on server when changed
+    var userData = [
+        { 
+            name: "Cameron",
+            imageUrl: "https://scontent-ord5-2.xx.fbcdn.net/v/t39.30808-6/290878958_5264204893693961_9097385299284351321_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=5f2048&_nc_ohc=RT3NIYbuBrUAX_-ZA44&_nc_ht=scontent-ord5-2.xx&oh=00_AfDMTWXhHPOiCP04_CZvSWLqXyedV_T9PP9Nnmx7_WdICQ&oe=655960B2",
+            ranking: [],
+            suggested: []
+        },
+        { 
+            name: "Nape",
+            imageUrl: "https://scontent-ord5-1.xx.fbcdn.net/v/t1.6435-9/66328707_10219808251215584_4183686578851282944_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=be3454&_nc_ohc=kXc2X7B2BesAX8TM3BP&_nc_ht=scontent-ord5-1.xx&oh=00_AfBrs95WVjCXDCZBEQmwEc-jye2rhcjH_oGaLi9bd_EZAw&oe=657AFE01",
+            ranking: [],
+            suggested: []
+        },
+        { 
+            name: "Sam",
+            imageUrl: "https://scontent-ord5-1.xx.fbcdn.net/v/t1.6435-9/45280447_2328975443811188_3384093771485413376_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=be3454&_nc_ohc=l4PcvHrfZv0AX9L3kiq&_nc_ht=scontent-ord5-1.xx&oh=00_AfAkcLZIITaaJ9yfGZdOgQFd6NWOnI2cNRQJ0Bvkp87XMQ&oe=657AF7F8",
+            ranking: [],
+            suggested: []
+        },
+        { 
+            name: "Victoria",
+            imageUrl: "https://scontent-ord5-1.xx.fbcdn.net/v/t1.6435-9/118264533_10220274187099666_4426649044870860193_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=be3454&_nc_ohc=7lfbAuThXC8AX8zYbiA&_nc_ht=scontent-ord5-1.xx&oh=00_AfA_1S2UK2h3F9Dq_5yCy8olgZ2gTLG6kLkyY-9Y1knriA&oe=657B0FB2",
+            ranking: [],
+            suggested: []
+        },
+        { 
+            name: "Jacob",
+            imageUrl: "https://scontent-ord5-1.xx.fbcdn.net/v/t39.30808-6/337035880_1293149624572351_7488433232123135545_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=5f2048&_nc_ohc=RLbPXpY4u58AX9frGcx&_nc_oc=AQl2Tw2JCp9mfKaFyBCJOFMaBH6P2gxE6KD4wmC1_-VLPB_6exL2wWSOAEf--g4F18g&_nc_ht=scontent-ord5-1.xx&oh=00_AfByzQzoMXe380NEjKQVo13hSGqTadTMZS4mvKtG801wrQ&oe=6557DA5C",
+            ranking: [],
+            suggested: []
+        },
+        { 
+            name: "Orion",
+            imageUrl: "https://scontent-ord5-1.xx.fbcdn.net/v/t39.30808-6/339279480_961782498532935_2230489480979870917_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=5f2048&_nc_ohc=j5TzZie1i_wAX9XNxtw&_nc_ht=scontent-ord5-1.xx&oh=00_AfCD3MA3zTz12XbZpyn_ASOr7hbRFNX-NZq6PdoSMp3KsA&oe=65589250",
+            ranking: [],
+            suggested: []
+        },
+        { 
+            name: "Dylan",
+            imageUrl: "https://scontent-ord5-1.xx.fbcdn.net/v/t1.6435-9/30594367_10156397370694973_3516262628286529536_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=be3454&_nc_ohc=YYCYkUyS4XgAX-5qCH4&_nc_ht=scontent-ord5-1.xx&oh=00_AfD0EeRNbzl8l6aMnCrv6qFLYdCADOqVX4aJx93p6XC58g&oe=657AEDE5",
+            ranking: [],
+            suggested: []
+        },
+        { 
+            name: "Colby",
+            imageUrl: "https://scontent-ord5-1.xx.fbcdn.net/v/t1.6435-9/69852983_2680750851983844_7237128968749449216_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=be3454&_nc_ohc=RkwA_4hxX7oAX_KuPab&_nc_ht=scontent-ord5-1.xx&oh=00_AfAJJp1Col6MtK3gg85V31un7nKX52dEbLVpCuu8Hsq-Gg&oe=657C6A7F",
+            ranking: [],
+            suggested: []
+        }
+    ];
+
+    const headerKeys = ["title", "category", "releaseDate", "ratingCount", "rating"];
+
+    // Dictionary of game data.
+    // Stores data for each game, with game id as a key
+    var gameData;
+    
+    // Array of all gameIds
+    var gameIds;
+
+    var suggestedDict = {};
+    
+    // vars used for chart dragging
+    var currRow = null,
+        dragElem = null,
+        elemHeight = 0,
+        mouseDownX = 0,
+        mouseDownY = 0,         
+        mouseX = 0,
+        mouseY = 0,      
+        mouseDrag = false;
+    
+    // vars used for suggestion table
+    var currPage = 0,
+        pageSize = 10,
+        currSort = 0,
+        sortIndex = 0,
+        maxPage = 100;
+    
+    /////////////////////////////////////////////////////////////////////
+    // async API routines
+    async function getGameData() {
+        let response = await fetch("./gameData.json", {
+            headers: { "Content-Type": "application/json" }
+        });
+        gameData = await response.json();
+        for( key of Object.keys(gameData) ) {
+            gameData[key].releaseDate = Number(gameData[key].releaseDate.slice(0,4)); // slice release date to just be year
+        }
+    }
+
+    async function getGameIds() {
+        let response = await fetch("./gameIdList.json", {
+            headers: { "Content-Type": "application/json" }
+        });
+        gameIds = await response.json();
+    }
+
+    // sets up data and everything that needs to wait for data to load
+    async function setUpData() {
+        await getGameIds();
+        await getGameData();
+        console.log(gameData[Object.keys(gameData)[0]]);
+        generateSuggestionRows();
+        populateSuggestionRows();
+        bindSuggestOnClick();
+        bindSuggestSorts();
+        maxPage = Math.floor(gameIds.length / pageSize);
+        console.log(maxPage);
+    }
+    
+    /////////////////////////////////////////////////////////////////////
+    // dom generation/modification routines
+    function populateSuggestionRows() {
+        let currGameId, currIdx, currRow, currIcon;
+        for ( let i = 0; i < pageSize; i++ ) {
+            currRow = suggestTbody.children.item(i);
+            currIdx = currPage * pageSize + i;
+            if ( currIdx >= gameIds.length ) {
+                currRow.classList.add('hideElem');
+                continue;
+            }
+            currRow.classList.remove('hideElem');
+            currIcon = currRow.getElementsByClassName('fa-solid')[0];
+            currIcon.classList.remove('fa-plus');
+            currIcon.classList.remove('fa-check');
+            if (suggestedDict[gameIds[currIdx]]){
+                currIcon.classList.add('fa-check');
+            } else
+                currIcon.classList.add('fa-plus');
+
+            currGameId = gameIds[currIdx];
+            for (let j = 0; j < headerKeys.length; j++ )
+                currRow.children.item(j).innerText = gameData[currGameId][headerKeys[j]];
+        }
+    }
+
+    // Generates:
+    // <tr class="gameTableItem">
+    //     <td>Title</td>
+    //     <td>Category</td>
+    //     <td>Release</td>
+    //     <td>Ratings</td>
+    //     <td>Rating /5</td>
+    //     <td class="iconHolder addIcon">
+    //         <i class="fa-solid fa-plus"></i>
+    //     </td>
+    // </tr>
+    function generateSuggestionRows() {
+        for ( let i = 0; i < pageSize; i++ ) {
+            let rowElem = document.createElement("tr");
+            rowElem.classList.add('gameTableItem');
+            for (let j = 0; j < headerKeys.length; j++ )
+                rowElem.appendChild(document.createElement("td"));
+            let addGameTD = document.createElement("td");
+            addGameTD.classList.add("addIcon");
+            addGameTD.classList.add("iconHolder");
+            let iconSpan = document.createElement("span");
+            let addGameIcon = document.createElement("i");
+            addGameIcon.classList.add("fa-solid");
+            addGameIcon.classList.add("fa-plus");
+            iconSpan.appendChild(addGameIcon);
+            addGameTD.appendChild(iconSpan);
+            rowElem.appendChild(addGameTD);
+            suggestTbody.appendChild(rowElem);
+        }
+    }
+
+    // Generates for each user:
+    // <div>
+    //     <span class="avatarWrap">
+    //     <img class="avatar" src="IMAGE_URL">
+    //     </span>
+    //     <p>USERNAME</p>
+    // </div>
+    function addAvatars() {
+        userData.forEach((val, id, arr) => {
+            let userDiv = document.createElement("div");
+            userDiv.onclick = () => { currUser = id; };
+            let avatarSpan = document.createElement("span");
+            avatarSpan.classList.add('avatarWrap');
+            let img = document.createElement("img");
+            img.classList.add('avatar');
+            img.src = val.imageUrl;
+            let nameText = document.createElement("p");
+            nameText.innerText = val.name;
+            avatarSpan.appendChild(img);
+            userDiv.appendChild(avatarSpan);
+            userDiv.appendChild(nameText);
+            userArea.appendChild(userDiv);
+        });
+    }
+
+    function toggleSuggested(index) { // C_TODO: change to toggle based on current user's suggestions
+        let icon = suggestIcons[index].children[0].children[0];
+        if(icon.classList.contains("fa-plus")) {
+            icon.classList.remove("fa-plus");
+            icon.classList.add("fa-check");
+            delete suggestedDict[gameIds[currPage * pageSize + index]];
+            return;
+        }
+        suggestedDict[gameIds[currPage * pageSize + index]] = true;
+        icon.classList.remove("fa-check");
+        icon.classList.add("fa-plus");
+    }
+
+    function sortGameDataInt(a, b, index) {
+        if ( gameData[a][headerKeys[index]] > gameData[b][headerKeys[index]] ) return 1;
+        if ( gameData[a][headerKeys[index]] < gameData[b][headerKeys[index]]) return -1;
+        return 0;
+    }
+    
+    function isString(val) {
+        return typeof val === 'string' || val instanceof String;
+    }
+
+    function sortTable(index) {
+        console.log(index);
+        if ( sortIndex != index ) {
+            let oldIcon = document.getElementsByClassName("tableSort")[sortIndex].children.item(1).children.item(0);
+            oldIcon.classList.remove("fa-arrows-up-long");
+            oldIcon.classList.remove("fa-arrow-down-long");
+            oldIcon.classList.add("fa-arrows-up-down");
+            sortIndex = index;
+        }
+        let currIcon = document.getElementsByClassName("tableSort")[index].children.item(1).children.item(0);
+
+        // sort in descending order
+        if ( currIcon.classList.contains("fa-arrow-down-long") || currIcon.classList.contains("fa-arrows-up-down") ) {
+            if ( isString(gameData[gameIds[0]][headerKeys[index]]) ) {
+                gameIds.sort((a,b) => { return -1 * gameData[a][headerKeys[index]].localeCompare(gameData[b][headerKeys[index]]); });
+            } else {
+                gameIds.sort((a,b) => { return -1 * sortGameDataInt( a, b, index ) });
+            }
+            currIcon.classList.remove("fa-arrow-down-long");
+            currIcon.classList.remove("fa-arrows-up-down");
+            currIcon.classList.add("fa-arrow-up-long");
+        } else { // sort in ascending order
+            if ( isString(gameData[gameIds[0]][headerKeys[index]]) ) {
+                gameIds.sort((a,b) => { return gameData[a][headerKeys[index]].localeCompare(gameData[b][headerKeys[index]]); });
+            } else {
+                gameIds.sort((a,b) => { return sortGameDataInt( a, b, index ); });
+            }
+            currIcon.classList.add("fa-arrow-down-long");
+            currIcon.classList.remove("fa-arrows-up-long");
+        }
+
+        // reset current page
+        currPage = 0;
+
+        // regen chart
+        populateSuggestionRows();
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    // event listener/binding routines
+    const suggestPrev = document.getElementById("suggestPrev");
+    const suggestNext = document.getElementById("suggestNext");
+    function setupPaginationDisplay() {
+        if ( currPage == maxPage )
+            suggestNext.classList.add("hideElem");
+        if ( currPage == 0 )
+            suggestPrev.classList.add("hideElem");
+    }
+
+    function bindSuggestPagination() {
+        setupPaginationDisplay();
+        suggestNext.onclick = () => {
+            if ( currPage == maxPage ) return;
+            suggestPrev.classList.remove("hideElem");
+            currPage++;
+            if ( currPage == maxPage )
+                suggestNext.classList.add("hideElem");
+            populateSuggestionRows();
+        }
+        
+        suggestPrev.onclick = () => {
+            if ( currPage == 0 ) return;
+            suggestNext.classList.remove("hideElem");
+            currPage--;
+            if ( currPage == 0 )
+                suggestPrev.classList.add("hideElem");
+            populateSuggestionRows();
+        }
+    }
+
+    function bindSuggestOnClick() {
+        suggestIcons = document.getElementsByClassName("addIcon");
+        for (let i = 0; i < suggestIcons.length; i++) {
+            suggestIcons[i].onclick = () => toggleSuggested(i);
+        }
+    }
+
+    function bindSuggestSorts() {
+        let sortHeaders = document.getElementsByClassName("tableSort");
+        for (let i = 0; i < sortHeaders.length; i++) {
+            sortHeaders[i].onclick = () => sortTable(i);
+        }
+    }
+
+    function bindNav() {
+        let navItems = document.getElementById("navList").children;
+        navItems[0].onclick = () => { window.scroll({ top: 0, behavior: 'smooth' }); };
+        navItems[1].onclick = () => {
+            window.scroll({ top: document.getElementById("voteArea").getBoundingClientRect().top + window.scrollY - document.getElementById("navList").getBoundingClientRect().height, behavior: 'smooth' });
+        };
+        navItems[2].onclick = () => {
+            window.scroll({ top: document.getElementById("suggestArea").getBoundingClientRect().top + window.scrollY - document.getElementById("navList").getBoundingClientRect().height, behavior: 'smooth' });
+        };
+    }
+
+    // bind listeners for vote table drag
+    function bindMouse() {
+        document.addEventListener('mousedown', (event) => {
+            if(event.button != 0) return true;
+            
+            let target = getTargetRow(event.target);
+            if(target) {
+                let coords = getMouseCoords(event);
+                mouseDownX = coords.x;
+                mouseDownY = coords.y;
+
+                currRow = target;
+                addDraggableRow(target);
+                currRow.classList.add('is-dragging');
+
+                mouseDrag = true;   
+            }
+        });
+        
+        document.addEventListener('mousemove', (event) => {
+            if(!mouseDrag) return;
+            
+            let coords = getMouseCoords(event);
+            mouseX = coords.x - mouseDownX;
+            mouseY = coords.y - mouseDownY;  
+            
+            moveRow(mouseX, mouseY);
+        });
+        
+        document.addEventListener('mouseup', (event) => {
+            if(!mouseDrag) return;
+            
+            currRow.classList.remove('is-dragging');
+            voteArea.removeChild(dragElem);
+            
+            dragElem = null;
+            mouseDrag = false;
+        });
+
+        document.addEventListener('scroll', (event) => {
+            if ( mouseDrag ) { // update grab pos if scroll while grabbing
+                dragElem.style.top = window.pageYOffset + mouseDownY - elemHeight / 2 + "px";
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setUpData();
+        bindNav();
+        addAvatars();
+        bindMouse();
+        bindSuggestPagination();
+    });
+
+    /////////////////////////////////////////////////////////////////////
+    // table drag routines
+    function swapRow(row, index) {
+        let currIndex = Array.from(voteTbody.children).indexOf(currRow),
+            row1 = currIndex > index ? currRow : row,
+            row2 = currIndex > index ? row : currRow;
+            
+            voteTbody.insertBefore(row1, row2);
+    }
+        
+    function moveRow(x, y) {
+        dragElem.style.transform = "translate3d(" + x + "px, " + y + "px, 0)";
+        
+        let	dPos = dragElem.getBoundingClientRect(),
+            currStartY = dPos.y, currEndY = currStartY + dPos.height,
+            rows = getRows();
+
+        for(var i = 0; i < rows.length; i++) {
+        let rowElem = rows[i],
+            rowSize = rowElem.getBoundingClientRect(),
+            rowStartY = rowSize.y, rowEndY = rowStartY + rowSize.height;
+
+        if(currRow !== rowElem && isIntersecting(currStartY, currEndY, rowStartY, rowEndY)) {
+            if(Math.abs(currStartY - rowStartY) < rowSize.height / 2)
+            swapRow(rowElem, i);
+        }
+        }    
+    }
+  
+    function addDraggableRow(target) {
+        // C_TODO: no need to make a new elem every time, should change to be display none between uses and populate tr text
+        dragElem = document.createElement("div");
+        dragElem.classList.add('draggedRowDiv');
+        let dragTR = target.cloneNode(true);
+        dragTR.classList.add('draggedRow');
+        dragTR.style.height = getStyle(target, 'height');
+        dragTR.style.background = getStyle(target, 'backgroundColor');     
+        for(var i = 0; i < target.children.length; i++) {
+            let oldTD = target.children[i],
+                newTD = dragTR.children[i];
+            newTD.style.width = getStyle(oldTD, 'width');
+            newTD.style.height = getStyle(oldTD, 'height');
+            newTD.style.padding = getStyle(oldTD, 'padding');
+            newTD.style.margin = getStyle(oldTD, 'margin');
+        }      
+        dragElem.appendChild(dragTR);
+        voteArea.appendChild(dragElem);
+
+        
+        let tPos = target.getBoundingClientRect();
+        elemHeight = tPos.height;
+        dragElem.style.top = window.pageYOffset + mouseDownY - elemHeight / 2 + "px";
+        dragElem.style.left = tPos.x + "px";
+        
+        document.dispatchEvent(new MouseEvent('mousemove',
+            { view: window, cancelable: true, bubbles: true }
+        ));    
+    }  
+    
+    function getRows() {
+        return voteTable.querySelectorAll('tbody tr');
+    }    
+    
+    function getTargetRow(target) {
+        let elemName = target.tagName.toLowerCase();
+        let ret = null;
+        if(elemName == 'tr' ) ret = target;
+        if(elemName == 'td' || elemName == 'i') ret = target.closest('tr');
+        if ( ret && ret.classList.contains("voteItem") ) return ret;  
+    }
+    
+    function getMouseCoords(event) {
+        return {
+            x: event.clientX,
+            y: event.clientY
+        };    
+    }  
+    
+    function getStyle(target, styleName) {
+        let compStyle = getComputedStyle(target),
+            style = compStyle[styleName];
+
+        return style ? style : null;
+    }  
+    
+    function isIntersecting(min0, max0, min1, max1) {
+        return Math.max(min0, max0) >= Math.min(min1, max1) &&
+                Math.min(min0, max0) <= Math.max(min1, max1);
+    }
+</script>
+</html>
+
